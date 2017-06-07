@@ -1,0 +1,16 @@
+---
+Language:        Cpp
+BasedOnStyle:  Google
+
+AllowShortFunctionsOnASingleLine: Empty
+AlignOperands: true
+AlignTrailingComments: true
+AlignAfterOpenBracket: Align
+SpacesInParentheses: true
+SpacesInSquareBrackets: true
+BreakBeforeBraces: Allman
+ColumnLimit: 120
+DerivePointerAlignment: false
+PointerAlignment: Left
+Cpp11BracedListStyle: false
+...
