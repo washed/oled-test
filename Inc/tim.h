@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : dma.h
-  * Description        : This file contains all the function prototypes for
-  *                      the dma.c file
+  * File Name          : TIM.h
+  * Description        : This file provides code for the configuration
+  *                      of the TIM instances.
   ******************************************************************************
   ** This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
@@ -37,9 +37,8 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __dma_H
-#define __dma_H
-
+#ifndef __tim_H
+#define __tim_H
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -48,19 +47,19 @@
 #include "stm32l4xx_hal.h"
 #include "main.h"
 
-/* DMA memory to memory transfer handles -------------------------------------*/
-extern DMA_HandleTypeDef hdma_memtomem_dma2_channel1;
-extern void _Error_Handler(char*, int);
-
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
+
+extern TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_DMA_Init(void);
+extern void _Error_Handler(char *, int);
+
+void MX_TIM1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
@@ -69,8 +68,11 @@ void MX_DMA_Init(void);
 #ifdef __cplusplus
 }
 #endif
+#endif /*__ tim_H */
 
-#endif /* __dma_H */
+/**
+  * @}
+  */
 
 /**
   * @}

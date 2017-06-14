@@ -41,6 +41,7 @@
 #include "gpio.h"
 #include "spi.h"
 #include "stm32l4xx_hal.h"
+#include "tim.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -62,7 +63,7 @@ void SystemClock_Config( void );
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+extern volatile uint8_t display_shadow[ 128 * 32 / 8 ];
 /* USER CODE END 0 */
 
 int main( void )
@@ -91,42 +92,50 @@ int main( void )
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_SPI2_Init();
+  MX_TIM1_Init();
 
   /* USER CODE BEGIN 2 */
   Initial();
+  HAL_TIM_Base_Start_IT( &htim1 );
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint32_t byte_index = 0;
+  uint32_t bit_index = 0;
+  uint8_t bit_pattern = 0;
+  uint8_t invert = 0;
+  Display_Fill_Shadow_DMA( 0 );
   while ( 1 )
   {
-    /*
-          Display_Chess(0);
-          HAL_Delay(500);
-          Display_Picture(pic);
-          HAL_Delay(500);
-          Display_Picture(pic1);
-          HAL_Delay(500);
-          Display_Picture(pic2);
-          HAL_Delay(500);
-          Display_Picture(pic3);
-          HAL_Delay(500);
-          Display_Picture(pic4);
-          HAL_Delay(500);
-          */
-    /*
-Display_Clear();
+    if ( invert == 0 )
+      bit_pattern |= ( 1 << bit_index );
+    else if ( invert == 1 )
+      bit_pattern &= ~( 1 << bit_index );
 
-display_Contrast_level( counter );
+    display_shadow[ byte_index ] = bit_pattern;
+    if ( ++bit_index >= 8 )
+    {
+      bit_index = 0;
 
-counter++;
-HAL_Delay( 100 );
-*/
+      if ( invert == 0 )
+        bit_pattern = 0;
+      else if ( invert == 1 )
+        bit_pattern = 0xFF;
 
-    Display_Fill( 0 );
-    HAL_Delay( 50 );
-    Display_Fill( 0xFF );
-    HAL_Delay( 50 );
+      byte_index++;
+      if ( byte_index >= 512 )
+      {
+        if ( invert == 0 )
+          invert = 1;
+        else if ( invert == 1 )
+          invert = 0;
+
+        byte_index = 0;
+      }
+      HAL_Delay( 1 );
+    }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
