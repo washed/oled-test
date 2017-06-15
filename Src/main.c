@@ -44,7 +44,8 @@
 #include "tim.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "fonts.h"
+#include "oled.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -63,7 +64,7 @@ void SystemClock_Config( void );
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-extern volatile uint8_t display_shadow[ 128 * 32 / 8 ];
+
 /* USER CODE END 0 */
 
 int main( void )
@@ -106,8 +107,38 @@ int main( void )
   uint8_t bit_pattern = 0;
   uint8_t invert = 0;
   Display_Fill_Shadow_DMA( 0 );
+
+  /*
+    Display_Number_Shadow( 0, 0, 0 );
+    Display_Number_Shadow( 8, 0, 1 );
+    Display_Number_Shadow( 16, 0, 2 );
+    Display_Number_Shadow( 24, 0, 4 );
+    Display_Number_Shadow( 32, 0, 5 );
+    Display_Number_Shadow( 40, 0, 6 );
+    Display_Number_Shadow( 48, 0, 7 );
+    Display_Number_Shadow( 56, 0, 8 );
+    Display_Number_Shadow( 64, 0, 9 );
+  */
+  int8_t i = 'X', y = 3, x = -16;
+
   while ( 1 )
   {
+    Display_Fill_Shadow_DMA( 0 );
+    Display_Char_Shadow( i + 0, x, y, &FONT_16X26 );
+    /*
+    Display_Char_Shadow( i + 1, 1 * 16, height, &FONT_16X26 );
+    Display_Char_Shadow( i + 2, 2 * 16, height, &FONT_16X26 );
+    Display_Char_Shadow( i + 3, 3 * 16, height, &FONT_16X26 );
+    Display_Char_Shadow( i + 4, 4 * 16, height, &FONT_16X26 );
+    Display_Char_Shadow( i + 5, 5 * 16, height, &FONT_16X26 );
+    Display_Char_Shadow( i + 6, 6 * 16, height, &FONT_16X26 );
+    Display_Char_Shadow( i + 7, 7 * 16, height, &FONT_16X26 );
+*/
+    // i += 8;
+    if ( ++x >= 128 ) x = -16;
+    // if ( ++y >= 32 ) y = 0;
+    HAL_Delay( 20 );
+    /*
     if ( invert == 0 )
       bit_pattern |= ( 1 << bit_index );
     else if ( invert == 1 )
@@ -135,7 +166,7 @@ int main( void )
       }
       HAL_Delay( 1 );
     }
-
+*/
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
