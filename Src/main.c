@@ -5,7 +5,7 @@
   ******************************************************************************
   ** This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
-  * USER CODE END. Other portions of this file, whether
+  * USER CODE END. Other portions of this file, whether 
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
@@ -35,17 +35,16 @@
   *
   ******************************************************************************
   */
+
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "dma.h"
-#include "gpio.h"
-#include "spi.h"
 #include "stm32l4xx_hal.h"
+#include "dma.h"
+#include "spi.h"
 #include "tim.h"
+#include "gpio.h"
 
 /* USER CODE BEGIN Includes */
-#include "fonts.h"
-#include "oled.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -61,6 +60,7 @@ void SystemClock_Config( void );
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 // extern const uint8_t pic[], pic1[], pic2[], pic3[], pic4[];
+extern void display_test();
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -96,77 +96,14 @@ int main( void )
   MX_TIM1_Init();
 
   /* USER CODE BEGIN 2 */
-  Initial();
   HAL_TIM_Base_Start_IT( &htim1 );
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint32_t byte_index = 0;
-  uint32_t bit_index = 0;
-  uint8_t bit_pattern = 0;
-  uint8_t invert = 0;
-  Display_Fill_Shadow_DMA( 0 );
-
-  /*
-    Display_Number_Shadow( 0, 0, 0 );
-    Display_Number_Shadow( 8, 0, 1 );
-    Display_Number_Shadow( 16, 0, 2 );
-    Display_Number_Shadow( 24, 0, 4 );
-    Display_Number_Shadow( 32, 0, 5 );
-    Display_Number_Shadow( 40, 0, 6 );
-    Display_Number_Shadow( 48, 0, 7 );
-    Display_Number_Shadow( 56, 0, 8 );
-    Display_Number_Shadow( 64, 0, 9 );
-  */
-  int8_t i = 'X', y = 3, x = -16;
-
+  display_test();
   while ( 1 )
   {
-    Display_Fill_Shadow_DMA( 0 );
-    Display_Char_Shadow( i + 0, x, y, &FONT_16X26 );
-    /*
-    Display_Char_Shadow( i + 1, 1 * 16, height, &FONT_16X26 );
-    Display_Char_Shadow( i + 2, 2 * 16, height, &FONT_16X26 );
-    Display_Char_Shadow( i + 3, 3 * 16, height, &FONT_16X26 );
-    Display_Char_Shadow( i + 4, 4 * 16, height, &FONT_16X26 );
-    Display_Char_Shadow( i + 5, 5 * 16, height, &FONT_16X26 );
-    Display_Char_Shadow( i + 6, 6 * 16, height, &FONT_16X26 );
-    Display_Char_Shadow( i + 7, 7 * 16, height, &FONT_16X26 );
-*/
-    // i += 8;
-    if ( ++x >= 128 ) x = -16;
-    // if ( ++y >= 32 ) y = 0;
-    HAL_Delay( 20 );
-    /*
-    if ( invert == 0 )
-      bit_pattern |= ( 1 << bit_index );
-    else if ( invert == 1 )
-      bit_pattern &= ~( 1 << bit_index );
-
-    display_shadow[ byte_index ] = bit_pattern;
-    if ( ++bit_index >= 8 )
-    {
-      bit_index = 0;
-
-      if ( invert == 0 )
-        bit_pattern = 0;
-      else if ( invert == 1 )
-        bit_pattern = 0xFF;
-
-      byte_index++;
-      if ( byte_index >= 512 )
-      {
-        if ( invert == 0 )
-          invert = 1;
-        else if ( invert == 1 )
-          invert = 0;
-
-        byte_index = 0;
-      }
-      HAL_Delay( 1 );
-    }
-*/
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -182,7 +119,7 @@ void SystemClock_Config( void )
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
   /**Initializes the CPU, AHB and APB busses clocks
-  */
+    */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = 16;
@@ -199,31 +136,31 @@ void SystemClock_Config( void )
   }
 
   /**Initializes the CPU, AHB and APB busses clocks
-  */
+    */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if ( HAL_RCC_ClockConfig( &RCC_ClkInitStruct, FLASH_LATENCY_4 ) != HAL_OK )
+  if ( HAL_RCC_ClockConfig( &RCC_ClkInitStruct, FLASH_LATENCY_3 ) != HAL_OK )
   {
     _Error_Handler( __FILE__, __LINE__ );
   }
 
   /**Configure the main internal regulator output voltage
-  */
+    */
   if ( HAL_PWREx_ControlVoltageScaling( PWR_REGULATOR_VOLTAGE_SCALE1 ) != HAL_OK )
   {
     _Error_Handler( __FILE__, __LINE__ );
   }
 
   /**Configure the Systick interrupt time
-  */
+    */
   HAL_SYSTICK_Config( HAL_RCC_GetHCLKFreq() / 1000 );
 
   /**Configure the Systick
-  */
+    */
   HAL_SYSTICK_CLKSourceConfig( SYSTICK_CLKSOURCE_HCLK );
 
   /* SysTick_IRQn interrupt configuration */

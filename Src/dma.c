@@ -77,8 +77,6 @@ void MX_DMA_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-        
-  
 
   /* DMA interrupt init */
   /* DMA1_Channel5_IRQn interrupt configuration */

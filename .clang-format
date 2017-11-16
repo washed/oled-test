@@ -1,10 +1,9 @@
----
 Language:        Cpp
 BasedOnStyle:  Google
-
 AllowShortFunctionsOnASingleLine: Empty
 AlignOperands: true
 AlignTrailingComments: true
+ReflowComments: false
 AlignAfterOpenBracket: Align
 SpacesInParentheses: true
 SpacesInSquareBrackets: true
@@ -13,4 +12,7 @@ ColumnLimit: 120
 DerivePointerAlignment: false
 PointerAlignment: Left
 Cpp11BracedListStyle: false
-...
+SortIncludes: false
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: false
+NamespaceIndentation: All
