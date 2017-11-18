@@ -36,24 +36,13 @@ extern "C" {
 void display_test()
 {
   oled1.init();
-
-  while ( 1 )
-  {
-    oled1.fill_shadow_dma( 0 );
-    oled1.transmit_frame();
-    HAL_Delay( 100 );
-
-    oled1.fill_shadow_dma( 255 );
-    oled1.transmit_frame();
-    HAL_Delay( 100 );
-  }
 }
 
 void HAL_SPI_TxCpltCallback( SPI_HandleTypeDef* hspi )
 {
   if ( hspi == &hspi2 )
   {
-    // oled1.frame_tx_complete();
+    oled1.spi_tx_complete();
   }
 }
 
@@ -61,7 +50,7 @@ void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef* htim )
 {
   if ( htim == &htim1 )
   {
-    //oled1.transmit_frame_dma();
+    oled1.update_frame_dma();
   }
 }
 
@@ -81,66 +70,119 @@ namespace Display
 
     HAL_Delay( 200 );
 
-    write_instruction( 0xae );  //--turn off oled panel
+    // set display off
+    write_instruction( 0xae );
 
-    write_instruction( 0xd5 );  //--set display clock divide ratio/oscillator frequency
-    write_instruction( 0x80 );  //--set divide ratio
+    // set display clock divide ratio/oscillator frequency
+    write_instruction( 0xd5 );
+    write_instruction( 0x80 );
 
-    write_instruction( 0xa8 );  //--set multiplex ratio(1 to 64)
-    // Write_Instruction( 0x1f );  //--1/32 duty for 128x32
-    write_instruction( 0x3f );  //--1/64 duty for 128x64
+    //set multiplex ratio
+    write_instruction( 0xa8 );
+    switch ( type.id )
+    {
+      case display_id::SSD1306_128X32:
+        // 1/32 duty for 128x32
+        write_instruction( 0x1f );
+        break;
+      case display_id::SSD1306_128X64:
+      case display_id::SH1106_128X64:
+        // 1/64 duty for 128x64
+        write_instruction( 0x3f );
+        break;
 
-    write_instruction( 0xd3 );  //-set display offset
-    write_instruction( 0x00 );  //-not offset
-
-    write_instruction( 0x8d );  //--set Charge Pump enable/disable
-    write_instruction( 0x14 );  //--set(0x10) disable
-
-    write_instruction( 0x40 );  //--set start line address
-
-    write_instruction( 0xa6 );  //--set normal display
-
-    write_instruction( 0xa4 );  // Disable Entire Display On
-
-    write_instruction( 0xa1 );  //--set segment re-map 128 to 0
-
-    write_instruction( 0xC8 );  //--Set COM Output Scan Direction 64 to 0
-
-    write_instruction( 0xda );  //--set com pins hardware configuration
-    // Write_Instruction( 0x42 );  // for 128x32 display!
-    write_instruction( 0x12 );  // for 128x64 display
-
-    write_instruction( 0x81 );  //--set contrast control register
-    write_instruction( contrast );
-
-    write_instruction( 0xd9 );  //--set pre-charge period
-    write_instruction( 0xf1 );
-
-    write_instruction( 0xdb );  //--set vcomh
-    write_instruction( 0x40 );
-
-    write_instruction( 0x20 );  //--set adressing mode
+      case display_id::NONE:
+      default:
+        // TODO: Error!
+        break;
+    }
+    // set display offset - no offset
+    write_instruction( 0xd3 );
     write_instruction( 0x00 );
 
-    write_instruction( 0xaf );  //--turn on oled panel
+    //set Charge Pump enable/disable
+    write_instruction( 0x8d );
+    write_instruction( 0x14 );
 
-    // Set page start and end address
-    set_page_address( 0, 7 );
+    // set start line address: 0
+    write_instruction( 0x40 );
 
-    // Set column start and end address
-    set_column_address( 2, 130 );
+    // set normal display (not inverted)
+    write_instruction( 0xa6 );
 
+    // disable entire display On
+    write_instruction( 0xa4 );
+
+    // set segment re-map 128 to 0
+    write_instruction( 0xa1 );
+
+    // set COM output scan direction 64 to 0
+    write_instruction( 0xC8 );
+
+    // set com pins hardware configuration
+    write_instruction( 0xda );
+    switch ( type.id )
+    {
+      case display_id::SSD1306_128X32:
+        // for 128x32 display
+        write_instruction( 0x42 );
+        break;
+      case display_id::SSD1306_128X64:
+      case display_id::SH1106_128X64:
+        // for 128x64 display
+        write_instruction( 0x12 );
+        break;
+
+      case display_id::NONE:
+      default:
+        // TODO: Error!
+        break;
+    }
+
+    // set contrast control register
+    write_instruction( 0x81 );
+    write_instruction( contrast );
+
+    // set pre-charge period
+    write_instruction( 0xd9 );
+    write_instruction( 0xf1 );
+
+    // set vcomh
+    write_instruction( 0xdb );
+    write_instruction( 0x40 );
+
+    // set adressing mode
+    write_instruction( 0x20 );
+    write_instruction( 0x00 );
+
+    // turn on oled panel
+    write_instruction( 0xaf );
+
+    // set page start and end address
+    set_page_address( type.start_page, type.end_page );
+
+    // set column start and end address
+    set_column_address( type.start_column, type.end_column );
+
+    // fill frame buffer with zero
+    active_buffer = 0;
     fill_shadow_dma( 0 );
+
+    for ( uint32_t i = 0; i < 8; i++ )
+    {
+      display_shadow[ active_buffer ][ i ] = 255;
+    }
+
+    init_complete = true;
+
+    // TODO: begin display update?
   }
 
   void oled::fill_shadow_dma( uint8_t value )
   {
     fill_value_shadow = value;
-    while ( oled_tx_busy == 1 )
-    {
-    }
-    HAL_DMA_Start_IT( &hdma_memtomem_dma2_channel1, (uint32_t)&fill_value_shadow, (uint32_t)&display_shadow[ 0 ],
-                      1024 );
+    HAL_DMA_Start_IT( &hdma_memtomem_dma2_channel1, (uint32_t)&fill_value_shadow,
+                      (uint32_t)&display_shadow[ active_buffer ][ 0 ], 1024 );
   }
 
   void oled::transmit_frame()
@@ -150,29 +192,47 @@ namespace Display
       oled_tx_busy = 1;
       if ( this->type.horizontal_mode == true )
       {
+        // Set command mode
+        dc( 0 );
+
         // Set page start and end address
         set_page_address( 0, 127 );
-        // TODO: This probably doesnt work!!!
+        // TODO: This probably doesn't work!!!
         // Set column start and end address
         set_column_address( 0, 7 );
 
+        // Set data mode
         dc( 1 );
+
+        // Assert chip select
         cs( 1 );
-        HAL_SPI_Transmit( &hspi2, (uint8_t*)&display_shadow[ 0 ], 1024, 1000 );
+
+        // Transmit
+        HAL_SPI_Transmit( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ 0 ], 1024, 1000 );
       }
       else
       {
         for ( uint32_t current_page = type.start_page; current_page <= type.end_page; current_page++ )
         {
+          // Set command mode
+          dc( 0 );
+
           // Set current page
           set_page( current_page );
 
           // Set column
           set_column( type.start_column );
 
+          // Set data mode
           dc( 1 );
+
+          // Assert chip select
           cs( 1 );
-          HAL_SPI_Transmit( &hspi2, (uint8_t*)&display_shadow[ current_page * 128 ], 128, 1000 );
+
+          // Transmit
+          HAL_SPI_Transmit( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ current_page * 128 ], 128, 1000 );
+
+          // Deassert chip select
           cs( 0 );
         }
       }
@@ -180,28 +240,97 @@ namespace Display
     }
   }
 
-  void oled::transmit_frame_dma()
+  void oled::update_frame_dma()
   {
-    if ( oled_tx_busy == 0 )
+    if ( ( true == init_complete ) && ( 0 == oled_tx_busy ) )
     {
       oled_tx_busy = 1;
+      dma_current_page = type.start_page;
 
-      // Set page start and end address
-      set_page_address( 0, 127 );
+      if ( this->type.horizontal_mode == true )
+      {
+        dma_pages_per_transfer = type.page_count;
+        transmit_frame_dma();
+      }
+      else
+      {
+        dma_pages_per_transfer = 1;
+        transmit_page_dma( type.start_page );
+      }
+    }
+  }
 
-      // Set column start and end address
-      set_column_address( 0, 7 );
+  void oled::transmit_frame_dma()
+  {
+    // Set command mode
+    dc( 0 );
 
-      dc( 1 );
-      cs( 1 );
-      HAL_SPI_Transmit_DMA( &hspi2, (uint8_t*)&display_shadow[ 0 ], 1024 );
+    // Set page start and end address
+    set_page( type.start_page );
+
+    // Set column start and end address
+    set_column( type.start_column );
+
+    // Set data mode
+    dc( 1 );
+
+    // Assert chip select
+    cs( 1 );
+
+    // Begin transfer
+    HAL_SPI_Transmit_DMA( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ 0 ], type.width * type.page_count );
+  }
+
+  void oled::transmit_page_dma( uint8_t page )
+  {
+    // Set command mode
+    dc( 0 );
+
+    // Set page start and end address
+    set_page( page );
+
+    // Set column start and end address
+    set_column( type.start_column );
+
+    // Set data mode
+    dc( 1 );
+
+    // Assert chip select
+    cs( 1 );
+
+    // Begin transfer
+    HAL_SPI_Transmit_DMA( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ page * type.width ], type.width );
+  }
+
+  void oled::spi_tx_complete()
+  {
+    dma_current_page += dma_pages_per_transfer;
+    if ( dma_current_page >= type.page_count )
+    {
+      dma_current_page = 0;
+      frame_tx_complete();
+    }
+    else
+    {
+      transmit_page_dma( dma_current_page );
     }
   }
 
   void oled::frame_tx_complete()
   {
+    static uint32_t column = 0;
+
     cs( 0 );
     oled_tx_busy = 0;
+
+    display_shadow[ active_buffer ][ column % 1024 ] = 0;
+    display_shadow[ active_buffer ][ ( column + 8 ) % 1024 ] = 255;
+    column++;
+
+    if ( column == 1024 )
+    {
+      column = 0;
+    }
   }
 
   void oled::set_column( uint8_t column )

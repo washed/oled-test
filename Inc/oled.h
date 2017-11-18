@@ -3,17 +3,17 @@
 
 namespace Display
 {
-  /*
-  enum class display_type : uint32_t
+  enum class display_id : uint32_t
   {
-    SSD1306_128X32,
-    SSD1306_128X64,
-    SH1106_128X64
+    NONE = 0,
+    SSD1306_128X32 = 1,
+    SSD1306_128X64 = 2,
+    SH1106_128X64 = 3
   };
-*/
 
   struct display_type
   {
+    display_id id;
     uint8_t start_column;
     uint8_t end_column;
     uint8_t start_page;
@@ -25,33 +25,39 @@ namespace Display
   };
 
   constexpr display_type SSD1306_128X32 = {
-    0,    // start column
-    128,  // end column
-    0,    // start page
-    3,    // end page
-    128,  // width
-    32,   // height
-    true  // horizontal_mode
+    display_id::SSD1306_128X32,  // ID
+    0,                           // start column
+    128,                         // end column
+    0,                           // start page
+    3,                           // end page
+    128,                         // width
+    32,                          // height
+    4,                           // page count
+    true                         // horizontal_mode
   };
 
   constexpr display_type SSD1306_128X64 = {
-    0,    // start column
-    128,  // end column
-    0,    // start page
-    7,    // end page
-    128,  // width
-    64,   // height
-    true  // horizontal_mode
+    display_id::SSD1306_128X64,  // ID
+    0,                           // start column
+    128,                         // end column
+    0,                           // start page
+    7,                           // end page
+    128,                         // width
+    64,                          // height
+    8,                           // page count
+    true                         // horizontal_mode
   };
 
   constexpr display_type SH1106_128X64 = {
-    2,     // start column
-    130,   // end column
-    0,     // start page
-    7,     // end page
-    128,   // width
-    64,    // height
-    false  // horizontal_mode
+    display_id::SH1106_128X64,  // ID
+    2,                          // start column
+    130,                        // end column
+    0,                          // start page
+    7,                          // end page
+    128,                        // width
+    64,                         // height
+    8,                          // page count
+    false                       // horizontal_mode
   };
 
   class oled
@@ -67,9 +73,15 @@ namespace Display
     void fill_shadow_dma( uint8_t value );
     void putc_shadow_dma( char chr, int16_t x, int16_t y, const UG_FONT* font );
     void set_contrast( uint8_t number );
+    void spi_tx_complete();
     void frame_tx_complete();
+
+    void update_frame_dma();
+
     void transmit_frame();
     void transmit_frame_dma();
+    void transmit_page_dma( uint8_t page );
+
     // void Write_number( const uint8_t* n, uint8_t k, uint8_t station_dot );
     // void Display_Picture( uint8_t pic[] );
 
@@ -78,9 +90,13 @@ namespace Display
 
     uint8_t contrast = 0xFF;
 
-    volatile uint8_t display_shadow[ 1024 ];
+    volatile uint8_t active_buffer = 0;
+    volatile uint8_t display_shadow[ 2 ][ 1024 ];
     volatile uint32_t oled_tx_busy = 0;
     volatile uint8_t fill_value_shadow = 0;
+    volatile uint8_t dma_current_page = 0;
+    volatile uint8_t dma_pages_per_transfer = 1;
+    volatile bool init_complete = false;
 
     void Display_SetPixel_Shadow( int16_t x, int16_t y, uint8_t set );
 
