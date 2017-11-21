@@ -5,27 +5,14 @@
  *      Author: washed
  */
 
-// clang-format off
 #include "stm32l4xx_hal.h"
 #include "spi.h"
 #include "tim.h"
 #include "dma.h"
+
 #include "oled_data.h"
-
 #include "fonts.h"
-
 #include "oled.h"
-
-// clang-format on
-
-/*
-void Display_Char_Shadow( uint8_t start_column, uint8_t start_page, UG_FONT* font, unsigned char character )
-{
-  if ( font->font_type == FONT_TYPE_1BPP ) return;
-  if ( start_column > ( Display_Width - font->char_width ) ) return;
-  if ( start_page > ( Display_Pages - 1 ) ) return;
-}
-*/
 
 Display::oled oled1( Display::SH1106_128X64 );
 
@@ -406,122 +393,6 @@ namespace Display
 }
 
 /*
-void Display_Char_Shadow( char chr, int16_t x, int16_t y, const UG_FONT* font )
-{
-  uint16_t i, j, k, xo, yo, c, bn, actual_char_width;
-  uint8_t b, bt;
-  uint32_t index;
-
-  bt = (uint8_t)chr;
-
-  switch ( bt )
-  {
-    case 0xF6:
-      bt = 0x94;
-      break;  // ö
-    case 0xD6:
-      bt = 0x99;
-      break;  // Ö
-    case 0xFC:
-      bt = 0x81;
-      break;  // ü
-    case 0xDC:
-      bt = 0x9A;
-      break;  // Ü
-    case 0xE4:
-      bt = 0x84;
-      break;  // ä
-    case 0xC4:
-      bt = 0x8E;
-      break;  // Ä
-    case 0xB5:
-      bt = 0xE6;
-      break;  // µ
-    case 0xB0:
-      bt = 0xF8;
-      break;  // °
-  }
-
-  if ( bt < font->start_char || bt > font->end_char ) return;
-
-  yo = y;
-  bn = font->char_width;
-  if ( !bn ) return;
-  bn >>= 3;
-  if ( font->char_width % 8 ) bn++;
-  actual_char_width = ( font->widths ? font->widths[ bt - font->start_char ] : font->char_width );
-
-  // Is hardware acceleration available?
-
-  if ( gui->driver[ DRIVER_FILL_AREA ].state & DRIVER_ENABLED )
-  {
-    //(void(*)(UG_COLOR))
-    push_pixel = ( (void* (*)( UG_S16, UG_S16, UG_S16, UG_S16 ))gui->driver[ DRIVER_FILL_AREA ].driver )(
-        x, y, x + actual_char_width - 1, y + font->char_height - 1 );
-
-    if ( font->font_type == FONT_TYPE_1BPP )
-    {
-      index = ( bt - font->start_char ) * font->char_height * bn;
-      for ( j = 0; j < font->char_height; j++ )
-      {
-        c = actual_char_width;
-        for ( i = 0; i < bn; i++ )
-        {
-          b = font->p[ index++ ];
-          for ( k = 0; ( k < 8 ) && c; k++ )
-          {
-            if ( b & 0x01 )
-            {
-              push_pixel( fc );
-            }
-            else
-            {
-              push_pixel( bc );
-            }
-            b >>= 1;
-            c--;
-          }
-        }
-      }
-    }
-  }
-  else
-
-{
-  // Not accelerated output
-  if ( font->font_type == FONT_TYPE_1BPP )
-  {
-    index = ( bt - font->start_char ) * font->char_height * bn;
-    for ( j = 0; j < font->char_height; j++ )
-    {
-      xo = x;
-      c = actual_char_width;
-      for ( i = 0; i < bn; i++ )
-      {
-        b = font->p[ index++ ];
-        for ( k = 0; ( k < 8 ) && c; k++ )
-        {
-          if ( b & 0x01 )
-          {
-            Display_SetPixel_Shadow( xo, yo, 1 );
-          }
-          else
-          {
-            Display_SetPixel_Shadow( xo, yo, 0 );
-          }
-          b >>= 1;
-          xo++;
-          c--;
-        }
-      }
-      yo++;
-    }
-  }
-}
-}
-*/
-
-/*
 static void Display_SetPixel_Shadow( int16_t x, int16_t y, uint8_t set )
 {
   uint8_t current_page, y_delta;
@@ -536,37 +407,5 @@ static void Display_SetPixel_Shadow( int16_t x, int16_t y, uint8_t set )
     display_shadow[ current_page * Display_Width + x ] |= ( 1 << y_delta );
   else if ( set == 0 )
     display_shadow[ current_page * Display_Width + x ] &= ~( 1 << y_delta );
-}
-*/
-
-/*
-void Display_Number_Shadow( uint8_t start_column, uint8_t start_page, uint8_t number )
-{
-  if ( start_column > ( Display_Width - 16 ) ) return;
-  if ( start_page > ( Display_Pages - 1 ) ) return;
-
-  for ( uint32_t i = 0; i < 8; i++ )
-  {
-    display_shadow[ i + start_column + ( start_page * Display_Width ) ] = num[ i + ( number * 16 ) ];
-    display_shadow[ i + Display_Width + start_column + ( start_page * Display_Width ) ] =
-        num[ i + 8 + ( number * 16 ) ];
-  }
-}
-*/
-
-/*
-void Display_Picture( uint8_t pic[] )
-{
-  uint8_t i, j, num = 0;
-  for ( i = 0; i < 0x04; i++ )
-  {
-    Set_Page_Address( i );
-    Set_Column_Address( 0x00 );
-    for ( j = 0; j < 0x80; j++ )
-    {
-      Write_Data( pic[ i * 0x80 + j ] );
-    }
-  }
-  return;
 }
 */

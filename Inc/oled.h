@@ -71,7 +71,6 @@ namespace Display
     void init();
 
     void fill_shadow_dma( uint8_t value );
-    void putc_shadow_dma( char chr, int16_t x, int16_t y, const UG_FONT* font );
     void set_contrast( uint8_t number );
     void spi_tx_complete();
     void frame_tx_complete();
