@@ -10,8 +10,6 @@
 #include "tim.h"
 #include "dma.h"
 
-#include "oled_data.h"
-#include "fonts.h"
 #include "oled.h"
 
 Display::oled oled1( Display::SH1106_128X64 );
