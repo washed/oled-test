@@ -160,7 +160,8 @@ namespace Display
 
     init_complete = true;
 
-    // TODO: begin display update?
+    // Start frame timer
+    HAL_TIM_Base_Start_IT( hal_timer_handle );
   }
 
   void oled::fill_shadow_dma( uint8_t value )
