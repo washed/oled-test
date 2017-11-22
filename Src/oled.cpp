@@ -47,11 +47,11 @@ namespace Display
 {
   void oled::init()
   {
-    reset( 0 );
+    reset( false );
     HAL_Delay( 20 );
-    reset( 1 );
+    reset( true );
     HAL_Delay( 200 );
-    reset( 0 );
+    reset( false );
 
     HAL_Delay( 200 );
 
@@ -178,7 +178,7 @@ namespace Display
       if ( this->type.horizontal_mode == true )
       {
         // Set command mode
-        dc( 0 );
+        dc( false );
 
         // Set page start and end address
         set_page_address( 0, 127 );
@@ -187,10 +187,10 @@ namespace Display
         set_column_address( 0, 7 );
 
         // Set data mode
-        dc( 1 );
+        dc( true );
 
         // Assert chip select
-        cs( 1 );
+        cs( true );
 
         // Transmit
         HAL_SPI_Transmit( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ 0 ], 1024, 1000 );
@@ -200,7 +200,7 @@ namespace Display
         for ( uint32_t current_page = type.start_page; current_page <= type.end_page; current_page++ )
         {
           // Set command mode
-          dc( 0 );
+          dc( false );
 
           // Set current page
           set_page( current_page );
@@ -209,16 +209,16 @@ namespace Display
           set_column( type.start_column );
 
           // Set data mode
-          dc( 1 );
+          dc( true );
 
           // Assert chip select
-          cs( 1 );
+          cs( true );
 
           // Transmit
           HAL_SPI_Transmit( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ current_page * 128 ], 128, 1000 );
 
           // Deassert chip select
-          cs( 0 );
+          cs( false );
         }
       }
       oled_tx_busy = 0;
@@ -248,7 +248,7 @@ namespace Display
   void oled::transmit_frame_dma()
   {
     // Set command mode
-    dc( 0 );
+    dc( false );
 
     // Set page start and end address
     set_page( type.start_page );
@@ -257,10 +257,10 @@ namespace Display
     set_column( type.start_column );
 
     // Set data mode
-    dc( 1 );
+    dc( true );
 
     // Assert chip select
-    cs( 1 );
+    cs( true );
 
     // Begin transfer
     HAL_SPI_Transmit_DMA( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ 0 ], type.width * type.page_count );
@@ -269,7 +269,7 @@ namespace Display
   void oled::transmit_page_dma( uint8_t page )
   {
     // Set command mode
-    dc( 0 );
+    dc( false );
 
     // Set page start and end address
     set_page( page );
@@ -278,10 +278,10 @@ namespace Display
     set_column( type.start_column );
 
     // Set data mode
-    dc( 1 );
+    dc( true );
 
     // Assert chip select
-    cs( 1 );
+    cs( true );
 
     // Begin transfer
     HAL_SPI_Transmit_DMA( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ page * type.width ], type.width );
@@ -351,42 +351,18 @@ namespace Display
 
   void oled::write_instruction( uint8_t cmd )
   {
-    dc( 0 );
-    cs( 1 );
     HAL_SPI_Transmit( &hspi2, &cmd, 1, 10 );
-    cs( 0 );
+    dc( false );
+    cs( true );
+    cs( false );
   }
 
   void oled::write_data( uint8_t dat )
   {
-    dc( 1 );
-    cs( 1 );
     HAL_SPI_Transmit( &hspi2, &dat, 1, 10 );
-    cs( 0 );
-  }
-
-  void oled::cs( uint8_t assert )
-  {
-    if ( assert == 1 )
-      HAL_GPIO_WritePin( SPI2_CS2_GPIO_Port, SPI2_CS2_Pin, GPIO_PIN_RESET );
-    else if ( assert == 0 )
-      HAL_GPIO_WritePin( SPI2_CS2_GPIO_Port, SPI2_CS2_Pin, GPIO_PIN_SET );
-  }
-
-  void oled::dc( uint8_t data )
-  {
-    if ( data == 1 )
-      HAL_GPIO_WritePin( OLED_DC_GPIO_Port, OLED_DC_Pin, GPIO_PIN_SET );
-    else if ( data == 0 )
-      HAL_GPIO_WritePin( OLED_DC_GPIO_Port, OLED_DC_Pin, GPIO_PIN_RESET );
-  }
-
-  void oled::reset( uint8_t reset )
-  {
-    if ( reset == 1 )
-      HAL_GPIO_WritePin( OLED_RST_GPIO_Port, OLED_RST_Pin, GPIO_PIN_RESET );
-    else if ( reset == 0 )
-      HAL_GPIO_WritePin( OLED_RST_GPIO_Port, OLED_RST_Pin, GPIO_PIN_SET );
+    dc( true );
+    cs( true );
+    cs( false );
   }
 }
 

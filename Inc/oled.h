@@ -108,9 +108,42 @@ namespace Display
     void write_data( uint8_t dat );
     void write_instruction( uint8_t cmd );
 
-    void cs( uint8_t assert );
-    void dc( uint8_t data );
-    void reset( uint8_t reset );
+    // Inline member functions
+    void cs( bool assert )
+    {
+      if ( true == assert )
+      {
+        HAL_GPIO_WritePin( SPI2_CS2_GPIO_Port, SPI2_CS2_Pin, GPIO_PIN_RESET );
+      }
+      else if ( false == assert )
+      {
+        HAL_GPIO_WritePin( SPI2_CS2_GPIO_Port, SPI2_CS2_Pin, GPIO_PIN_SET );
+      }
+    }
+
+    void dc( bool assert_data )
+    {
+      if ( true == assert_data )
+      {
+        HAL_GPIO_WritePin( OLED_DC_GPIO_Port, OLED_DC_Pin, GPIO_PIN_SET );
+      }
+      else if ( false == assert_data )
+      {
+        HAL_GPIO_WritePin( OLED_DC_GPIO_Port, OLED_DC_Pin, GPIO_PIN_RESET );
+      }
+    }
+
+    void reset( bool assert_reset )
+    {
+      if ( true == assert_reset )
+      {
+        HAL_GPIO_WritePin( OLED_RST_GPIO_Port, OLED_RST_Pin, GPIO_PIN_RESET );
+      }
+      else if ( false == assert_reset )
+      {
+        HAL_GPIO_WritePin( OLED_RST_GPIO_Port, OLED_RST_Pin, GPIO_PIN_SET );
+      }
+    }
   };
 
   extern oled oled1;
