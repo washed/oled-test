@@ -12,7 +12,7 @@
 
 #include "oled.h"
 
-Display::oled oled1( Display::SH1106_128X64 );
+Display::oled oled1( Display::SH1106_128X64, &hspi2, &htim1 );
 
 #ifdef __cplusplus
 extern "C" {
@@ -193,7 +193,7 @@ namespace Display
         cs( true );
 
         // Transmit
-        HAL_SPI_Transmit( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ 0 ], 1024, 1000 );
+        HAL_SPI_Transmit( hal_spi_handle, (uint8_t*)&display_shadow[ active_buffer ][ 0 ], 1024, 1000 );
       }
       else
       {
@@ -215,7 +215,8 @@ namespace Display
           cs( true );
 
           // Transmit
-          HAL_SPI_Transmit( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ current_page * 128 ], 128, 1000 );
+          HAL_SPI_Transmit( hal_spi_handle, (uint8_t*)&display_shadow[ active_buffer ][ current_page * 128 ], 128,
+                            1000 );
 
           // Deassert chip select
           cs( false );
@@ -263,7 +264,8 @@ namespace Display
     cs( true );
 
     // Begin transfer
-    HAL_SPI_Transmit_DMA( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ 0 ], type.width * type.page_count );
+    HAL_SPI_Transmit_DMA( hal_spi_handle, (uint8_t*)&display_shadow[ active_buffer ][ 0 ],
+                          type.width * type.page_count );
   }
 
   void oled::transmit_page_dma( uint8_t page )
@@ -284,7 +286,7 @@ namespace Display
     cs( true );
 
     // Begin transfer
-    HAL_SPI_Transmit_DMA( &hspi2, (uint8_t*)&display_shadow[ active_buffer ][ page * type.width ], type.width );
+    HAL_SPI_Transmit_DMA( hal_spi_handle, (uint8_t*)&display_shadow[ active_buffer ][ page * type.width ], type.width );
   }
 
   void oled::spi_tx_complete()
@@ -351,17 +353,17 @@ namespace Display
 
   void oled::write_instruction( uint8_t cmd )
   {
-    HAL_SPI_Transmit( &hspi2, &cmd, 1, 10 );
     dc( false );
     cs( true );
+    HAL_SPI_Transmit( hal_spi_handle, &cmd, 1, 10 );
     cs( false );
   }
 
   void oled::write_data( uint8_t dat )
   {
-    HAL_SPI_Transmit( &hspi2, &dat, 1, 10 );
     dc( true );
     cs( true );
+    HAL_SPI_Transmit( hal_spi_handle, &dat, 1, 10 );
     cs( false );
   }
 }

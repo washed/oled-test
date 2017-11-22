@@ -63,9 +63,11 @@ namespace Display
   class oled
   {
    public:
-    oled( display_type _type )
+    oled( display_type _type, SPI_HandleTypeDef* _hal_spi_handle, TIM_HandleTypeDef* _hal_timer_handle )
     {
       type = _type;
+      hal_spi_handle = _hal_spi_handle;
+      hal_timer_handle = _hal_timer_handle;
     }
 
     void init();
@@ -86,6 +88,8 @@ namespace Display
 
    private:
     display_type type;
+    SPI_HandleTypeDef* hal_spi_handle;
+    TIM_HandleTypeDef* hal_timer_handle;
 
     uint8_t contrast = 0xFF;
 
