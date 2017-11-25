@@ -83,9 +83,6 @@ namespace Display
     void transmit_frame_dma();
     void transmit_page_dma( uint8_t page );
 
-    // void Write_number( const uint8_t* n, uint8_t k, uint8_t station_dot );
-    // void Display_Picture( uint8_t pic[] );
-
    private:
     display_type type;
     SPI_HandleTypeDef* hal_spi_handle;
