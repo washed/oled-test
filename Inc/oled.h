@@ -72,13 +72,13 @@ namespace Display
 
     void init();
 
+    // Frame buffer manipulation functions
     void fill_shadow_dma( uint8_t value );
-    void set_contrast( uint8_t number );
+
+    // TX related functions
     void spi_tx_complete();
     void frame_tx_complete();
-
     void update_frame_dma();
-
     void transmit_frame();
     void transmit_frame_dma();
     void transmit_page_dma( uint8_t page );
@@ -99,8 +99,7 @@ namespace Display
 
     void Display_SetPixel_Shadow( int16_t x, int16_t y, uint8_t set );
 
-    void Display_TxFrame_DMA();
-
+    void set_contrast( uint8_t number );
     void set_page_address( uint8_t start, uint8_t end );
     void set_column_address( uint8_t start, uint8_t end );
     void set_column( uint8_t column );
