@@ -93,8 +93,7 @@ namespace Display
 
     uint8_t contrast = 0xFF;
 
-    volatile uint8_t active_buffer = 0;
-    volatile uint8_t display_shadow[ 2 ][ 1024 ];
+    volatile uint8_t display_shadow[ 1024 ];
     volatile uint32_t oled_tx_busy = 0;
     volatile uint8_t fill_value_shadow = 0;
     volatile uint8_t dma_current_page = 0;

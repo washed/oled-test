@@ -150,13 +150,7 @@ namespace Display
     set_column_address( type.start_column, type.end_column );
 
     // fill frame buffer with zero
-    active_buffer = 0;
     fill_shadow_dma( 0 );
-
-    for ( uint32_t i = 0; i < 8; i++ )
-    {
-      display_shadow[ active_buffer ][ i ] = 255;
-    }
 
     init_complete = true;
 
@@ -167,8 +161,8 @@ namespace Display
   void oled::fill_shadow_dma( uint8_t value )
   {
     fill_value_shadow = value;
-    HAL_DMA_Start_IT( &hdma_memtomem_dma2_channel1, (uint32_t)&fill_value_shadow,
-                      (uint32_t)&display_shadow[ active_buffer ][ 0 ], 1024 );
+    HAL_DMA_Start_IT( &hdma_memtomem_dma2_channel1, (uint32_t)&fill_value_shadow, (uint32_t)&display_shadow[ 0 ],
+                      1024 );
   }
 
   void oled::transmit_frame()
@@ -194,7 +188,7 @@ namespace Display
         cs( true );
 
         // Transmit
-        HAL_SPI_Transmit( hal_spi_handle, (uint8_t*)&display_shadow[ active_buffer ][ 0 ], 1024, 1000 );
+        HAL_SPI_Transmit( hal_spi_handle, (uint8_t*)&display_shadow[ 0 ], 1024, 1000 );
       }
       else
       {
@@ -216,8 +210,7 @@ namespace Display
           cs( true );
 
           // Transmit
-          HAL_SPI_Transmit( hal_spi_handle, (uint8_t*)&display_shadow[ active_buffer ][ current_page * 128 ], 128,
-                            1000 );
+          HAL_SPI_Transmit( hal_spi_handle, (uint8_t*)&display_shadow[ current_page * 128 ], 128, 1000 );
 
           // Deassert chip select
           cs( false );
@@ -265,8 +258,7 @@ namespace Display
     cs( true );
 
     // Begin transfer
-    HAL_SPI_Transmit_DMA( hal_spi_handle, (uint8_t*)&display_shadow[ active_buffer ][ 0 ],
-                          type.width * type.page_count );
+    HAL_SPI_Transmit_DMA( hal_spi_handle, (uint8_t*)&display_shadow[ 0 ], type.width * type.page_count );
   }
 
   void oled::transmit_page_dma( uint8_t page )
@@ -287,7 +279,7 @@ namespace Display
     cs( true );
 
     // Begin transfer
-    HAL_SPI_Transmit_DMA( hal_spi_handle, (uint8_t*)&display_shadow[ active_buffer ][ page * type.width ], type.width );
+    HAL_SPI_Transmit_DMA( hal_spi_handle, (uint8_t*)&display_shadow[ page * type.width ], type.width );
   }
 
   void oled::spi_tx_complete()
@@ -311,8 +303,8 @@ namespace Display
     cs( 0 );
     oled_tx_busy = 0;
 
-    display_shadow[ active_buffer ][ column % 1024 ] = 0;
-    display_shadow[ active_buffer ][ ( column + 8 ) % 1024 ] = 255;
+    display_shadow[ column % 1024 ] = 0;
+    display_shadow[ ( column + 8 ) % 1024 ] = 255;
     column++;
 
     if ( column == 1024 )
