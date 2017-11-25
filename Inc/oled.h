@@ -74,6 +74,7 @@ namespace Display
 
     // Frame buffer manipulation functions
     void fill_shadow_dma( uint8_t value );
+    void set_pixel_shadow( int16_t x, int16_t y, bool set );
 
     // TX related functions
     void spi_tx_complete();
@@ -97,52 +98,17 @@ namespace Display
     volatile uint8_t dma_pages_per_transfer = 1;
     volatile bool init_complete = false;
 
-    void Display_SetPixel_Shadow( int16_t x, int16_t y, uint8_t set );
-
-    void set_contrast( uint8_t number );
-    void set_page_address( uint8_t start, uint8_t end );
-    void set_column_address( uint8_t start, uint8_t end );
-    void set_column( uint8_t column );
-    void set_page( uint8_t page );
-    void write_data( uint8_t dat );
-    void write_instruction( uint8_t cmd );
-
     // Inline member functions
-    void cs( bool assert )
-    {
-      if ( true == assert )
-      {
-        HAL_GPIO_WritePin( SPI2_CS2_GPIO_Port, SPI2_CS2_Pin, GPIO_PIN_RESET );
-      }
-      else if ( false == assert )
-      {
-        HAL_GPIO_WritePin( SPI2_CS2_GPIO_Port, SPI2_CS2_Pin, GPIO_PIN_SET );
-      }
-    }
-
-    void dc( bool assert_data )
-    {
-      if ( true == assert_data )
-      {
-        HAL_GPIO_WritePin( OLED_DC_GPIO_Port, OLED_DC_Pin, GPIO_PIN_SET );
-      }
-      else if ( false == assert_data )
-      {
-        HAL_GPIO_WritePin( OLED_DC_GPIO_Port, OLED_DC_Pin, GPIO_PIN_RESET );
-      }
-    }
-
-    void reset( bool assert_reset )
-    {
-      if ( true == assert_reset )
-      {
-        HAL_GPIO_WritePin( OLED_RST_GPIO_Port, OLED_RST_Pin, GPIO_PIN_RESET );
-      }
-      else if ( false == assert_reset )
-      {
-        HAL_GPIO_WritePin( OLED_RST_GPIO_Port, OLED_RST_Pin, GPIO_PIN_SET );
-      }
-    }
+    inline void set_contrast( uint8_t number );
+    inline void set_page_address( uint8_t start, uint8_t end );
+    inline void set_column_address( uint8_t start, uint8_t end );
+    inline void set_column( uint8_t column );
+    inline void set_page( uint8_t page );
+    inline void write_data( uint8_t dat );
+    inline void write_instruction( uint8_t cmd );
+    inline void cs( bool assert );
+    inline void dc( bool assert_data );
+    inline void reset( bool assert_reset );
   };
 
   extern oled oled1;

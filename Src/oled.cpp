@@ -313,38 +313,38 @@ namespace Display
     }
   }
 
-  void oled::set_column( uint8_t column )
+  inline void oled::set_column( uint8_t column )
   {
     write_instruction( column & 0x0F );
     write_instruction( 0x10 | ( column >> 4 ) );
   }
 
-  void oled::set_page( uint8_t page )
+  inline void oled::set_page( uint8_t page )
   {
     write_instruction( 0xB0 | page );
   }
 
-  void oled::set_page_address( uint8_t start, uint8_t end )
+  inline void oled::set_page_address( uint8_t start, uint8_t end )
   {
     write_instruction( 0x21 );
     write_instruction( start );
     write_instruction( end );
   }
 
-  void oled::set_column_address( uint8_t start, uint8_t end )
+  inline void oled::set_column_address( uint8_t start, uint8_t end )
   {
     write_instruction( 0x22 );
     write_instruction( start );
     write_instruction( end );
   }
 
-  void oled::set_contrast( uint8_t mod )
+  inline void oled::set_contrast( uint8_t mod )
   {
     write_instruction( 0x81 );
     write_instruction( mod );
   }
 
-  void oled::write_instruction( uint8_t cmd )
+  inline void oled::write_instruction( uint8_t cmd )
   {
     dc( false );
     cs( true );
@@ -352,12 +352,48 @@ namespace Display
     cs( false );
   }
 
-  void oled::write_data( uint8_t dat )
+  inline void oled::write_data( uint8_t dat )
   {
     dc( true );
     cs( true );
     HAL_SPI_Transmit( hal_spi_handle, &dat, 1, 10 );
     cs( false );
+  }
+
+  inline void oled::cs( bool assert )
+  {
+    if ( true == assert )
+    {
+      HAL_GPIO_WritePin( SPI2_CS2_GPIO_Port, SPI2_CS2_Pin, GPIO_PIN_RESET );
+    }
+    else if ( false == assert )
+    {
+      HAL_GPIO_WritePin( SPI2_CS2_GPIO_Port, SPI2_CS2_Pin, GPIO_PIN_SET );
+    }
+  }
+
+  inline void oled::dc( bool assert_data )
+  {
+    if ( true == assert_data )
+    {
+      HAL_GPIO_WritePin( OLED_DC_GPIO_Port, OLED_DC_Pin, GPIO_PIN_SET );
+    }
+    else if ( false == assert_data )
+    {
+      HAL_GPIO_WritePin( OLED_DC_GPIO_Port, OLED_DC_Pin, GPIO_PIN_RESET );
+    }
+  }
+
+  inline void oled::reset( bool assert_reset )
+  {
+    if ( true == assert_reset )
+    {
+      HAL_GPIO_WritePin( OLED_RST_GPIO_Port, OLED_RST_Pin, GPIO_PIN_RESET );
+    }
+    else if ( false == assert_reset )
+    {
+      HAL_GPIO_WritePin( OLED_RST_GPIO_Port, OLED_RST_Pin, GPIO_PIN_SET );
+    }
   }
 }
 
