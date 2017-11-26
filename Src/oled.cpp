@@ -298,19 +298,8 @@ namespace Display
 
   void oled::frame_tx_complete()
   {
-    static uint32_t column = 0;
-
     cs( 0 );
     oled_tx_busy = 0;
-
-    display_shadow[ column % 1024 ] = 0;
-    display_shadow[ ( column + 8 ) % 1024 ] = 255;
-    column++;
-
-    if ( column == 1024 )
-    {
-      column = 0;
-    }
   }
 
   inline void oled::set_column( uint8_t column )
@@ -396,21 +385,3 @@ namespace Display
     }
   }
 }
-
-/*
-static void Display_SetPixel_Shadow( int16_t x, int16_t y, uint8_t set )
-{
-  uint8_t current_page, y_delta;
-
-  if ( x >= Display_Width ) return;
-  if ( y >= Display_Height ) return;
-
-  current_page = y / 8;
-  y_delta = y % 8;
-
-  if ( set == 1 )
-    display_shadow[ current_page * Display_Width + x ] |= ( 1 << y_delta );
-  else if ( set == 0 )
-    display_shadow[ current_page * Display_Width + x ] &= ~( 1 << y_delta );
-}
-*/
