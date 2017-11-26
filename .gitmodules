@@ -1,3 +1,6 @@
 [submodule "etl"]
 	path = etl
 	url = https://github.com/ETLCPP/etl
+[submodule "UGUI"]
+	path = UGUI
+	url = https://github.com/achimdoebler/UGUI
